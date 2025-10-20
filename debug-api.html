@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug API Connection</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #667eea;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .log-entry {
+            margin: 4px 0;
+            padding: 4px 8px;
+            border-left: 3px solid transparent;
+        }
+        .log-info {
+            border-left-color: #00d4ff;
+            color: #00d4ff;
+        }
+        .log-success {
+            border-left-color: #10b981;
+            color: #10b981;
+        }
+        .log-error {
+            border-left-color: #ef4444;
+            color: #ef4444;
+        }
+        .log-warning {
+            border-left-color: #f59e0b;
+            color: #f59e0b;
+        }
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 5px;
+        }
+        .status-ok {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        .info-item {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .info-label {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-size: 16px;
+            color: #1f2937;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+        .data-preview {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 ElectroMove API Debug Tool</h1>
+        
+        <div class="card">
+            <h2>📡 API Configuration</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Base URL</div>
+                    <div class="info-value" id="baseUrl">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Endpoint</div>
+                    <div class="info-value" id="endpoint">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value">
+                        <span class="status status-pending" id="connectionStatus">Not Tested</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Records</div>
+                    <div class="info-value" id="recordCount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🧪 Tests</h2>
+            <button onclick="testBasicFetch()">1️⃣ Basic Fetch Test</button>
+            <button onclick="testWithCORS()">2️⃣ CORS Test</button>
+            <button onclick="testHeaders()">3️⃣ Headers Test</button>
+            <button onclick="testFullAPI()">4️⃣ Full API Test</button>
+            <button onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+
+        <div class="card">
+            <h2>📋 Console Logs</h2>
+            <div class="log" id="logContainer">
+                <div class="log-entry log-info">🚀 Debug tool ready. Click a test button to start.</div>
+            </div>
+        </div>
+
+        <div class="card" id="dataCard" style="display: none;">
+            <h2>📊 Data Preview</h2>
+            <div class="data-preview" id="dataPreview"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://swp391.up.railway.app/api';
+        const API_ENDPOINT = '/pricetable';
+        const API_URL = API_BASE + API_ENDPOINT;
+
+        document.getElementById('baseUrl').textContent = API_BASE;
+        document.getElementById('endpoint').textContent = API_ENDPOINT;
+
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function updateStatus(status, text) {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.className = `status status-${status}`;
+            statusEl.textContent = text;
+        }
+
+        function clearLogs() {
+            document.getElementById('logContainer').innerHTML = '';
+            document.getElementById('dataCard').style.display = 'none';
+            log('Logs cleared', 'info');
+        }
+
+        async function testBasicFetch() {
+            clearLogs();
+            log('🔄 Starting Basic Fetch Test...', 'info');
+            log('📡 URL: ' + API_URL, 'info');
+            updateStatus('pending', 'Testing...');
+
+            try {
+                log('🌐 Sending fetch request...', 'info');
+                const startTime = Date.now();
+                
+                const response = await fetch(API_URL);
+                
+                const duration = Date.now() - startTime;
+                log(`✅ Response received in ${duration}ms`, 'success');
+                log(`   Status: ${response.status} ${response.statusText}`, 'info');
+                log(`   OK: ${response.ok}`, 'info');
+                log(`   Type: ${response.type}`, 'info');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ JSON parsed successfully`, 'success');
+                    log(`📊 Records: ${data.length}`, 'success');
+                    
+                    document.getElementById('recordCount').textContent = data.length;
+                    updateStatus('ok', 'Connected');
+                    
+                    showData(data);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+            } catch (error) {
+                log(`❌ ERROR: ${error.message}`, 'error');
+                log(`   Type: ${error.name}`, 'error');
+                updateStatus('error', 'Failed');
+            }
+        }
+
+        async function testWithCORS() {
+            clearLogs();
+            log('🌐 Testing with CORS mode...', 'info');
+            updateStatus('pending', 'Testing...');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                log(`✅ CORS request successful`, 'success');
+                log(`   Status: ${response.status}`, 'info');
+                
+                const data = await response.json();
+                log(`✅ Data received: ${data.length} records`, 'success');
+                
+                updateStatus('ok', 'Connected');
+                showData(data);
+
+            } catch (error) {
+                log(`❌ CORS ERROR: ${error.message}`, 'error');
+                
+                if (error.message.includes('CORS')) {
+                    log(`⚠️  CORS is blocking the request`, 'warning');
+                    log(`   This usually means the server doesn't allow requests from this origin`, 'warning');
+                }
+                
+                updateStatus('error', 'CORS Failed');
+            }
+        }
+
+        async function testHeaders() {
+            clearLogs();
+            log('📨 Testing Response Headers...', 'info');
+
+            try {
+                const response = await fetch(API_URL);
+                
+                log('✅ Headers received:', 'success');
+                response.headers.forEach((value, key) => {
+                    log(`   ${key}: ${value}`, 'info');
+                });
+
+                // Check CORS headers
+                const corsHeaders = [
+                    'access-control-allow-origin',
+                    'access-control-allow-methods',
+                    'access-control-allow-headers'
+                ];
+
+                log('\n🔍 CORS Headers:', 'info');
+                corsHeaders.forEach(header => {
+                    const value = response.headers.get(header);
+                    if (value) {
+                        log(`   ✅ ${header}: ${value}`, 'success');
+                    } else {
+                        log(`   ❌ ${header}: Not found`, 'error');
+                    }
+                });
+
+            } catch (error) {
+                log(`❌ ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFullAPI() {
+            clearLogs();
+            log('🚀 Running Full API Test Suite...', 'info');
+            updateStatus('pending', 'Testing...');
+
+            try {
+                // Test 1: Connection
+                log('\n📡 Test 1: Connection', 'info');
+                const response = await fetch(API_URL);
+                log(`✅ Connected (${response.status})`, 'success');
+
+                // Test 2: Data parsing
+                log('\n📄 Test 2: Data Parsing', 'info');
+                const data = await response.json();
+                log(`✅ JSON valid: ${data.length} records`, 'success');
+
+                // Test 3: Data structure
+                log('\n🔍 Test 3: Data Structure', 'info');
+                if (data.length > 0) {
+                    const sample = data[0];
+                    log(`   Sample record:`, 'info');
+                    Object.keys(sample).forEach(key => {
+                        log(`   • ${key}: ${typeof sample[key]}`, 'info');
+                    });
+                    log(`✅ Structure validated`, 'success');
+                }
+
+                // Test 4: Data values
+                log('\n💰 Test 4: Price Data', 'info');
+                data.forEach((item, index) => {
+                    log(`   Record ${index + 1}: $${(item.pricePerKWh/100).toFixed(2)}/kWh, Penalty: $${(item.penaltyFeePerMinute/100).toFixed(2)}/min, Status: ${item.status === 1 ? 'Active' : 'Inactive'}`, 'info');
+                });
+
+                updateStatus('ok', 'All Tests Passed');
+                document.getElementById('recordCount').textContent = data.length;
+                showData(data);
+
+                log('\n✅ All tests completed successfully!', 'success');
+
+            } catch (error) {
+                log(`\n❌ Test failed: ${error.message}`, 'error');
+                updateStatus('error', 'Tests Failed');
+            }
+        }
+
+        function showData(data) {
+            const dataCard = document.getElementById('dataCard');
+            const dataPreview = document.getElementById('dataPreview');
+            
+            dataCard.style.display = 'block';
+            dataPreview.textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Auto-run basic test on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🤖 Auto-running basic connection test...', 'info');
+                testBasicFetch();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

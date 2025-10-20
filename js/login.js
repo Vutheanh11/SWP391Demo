@@ -1,5 +1,17 @@
 // Electric Transport Login Page JavaScript
 
+// Check if user is already logged in and redirect
+(function checkExistingLogin() {
+    const adminToken = localStorage.getItem('adminToken');
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    
+    if (adminToken && isLoggedIn === 'true') {
+        console.log('🔓 User already logged in, redirecting to admin...');
+        window.location.href = 'admin.html';
+        return;
+    }
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
     // Get form elements
     const loginForm = document.getElementById('loginForm');
@@ -149,10 +161,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Login successful, showing success message...');
                 showSuccessMessage('Login successful! Redirecting...');
                 
-                // Store session authentication
-                sessionStorage.setItem('isLoggedIn', 'true');
-                sessionStorage.setItem('userEmail', email);
-                sessionStorage.setItem('loginTime', new Date().toISOString());
+                // Store authentication in localStorage (not sessionStorage)
+                localStorage.setItem('adminToken', 'mock_token_' + Date.now());
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('loginTime', new Date().toISOString());
                 
                 // Store login info if remember me is checked
                 if (rememberMe) {
@@ -161,38 +174,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.removeItem('rememberedEmail');
                 }
                 
-                console.log('✅ Session stored:', {
-                    isLoggedIn: sessionStorage.getItem('isLoggedIn'),
-                    userEmail: sessionStorage.getItem('userEmail')
+                console.log('✅ Auth stored in localStorage:', {
+                    adminToken: localStorage.getItem('adminToken'),
+                    userEmail: localStorage.getItem('userEmail'),
+                    isLoggedIn: localStorage.getItem('isLoggedIn')
                 });
                 
-                // Simulate redirect after 1 second (reduced from 2)
-                console.log('Setting timeout for redirect...');
+                // Redirect immediately to admin page
+                console.log('Redirecting to admin.html now...');
                 setTimeout(() => {
-                    console.log('Redirecting to admin.html...');
-                    // Try multiple redirect methods
-                    try {
-                        window.location.href = 'admin.html';
-                    } catch (error) {
-                        console.error('Error with window.location.href:', error);
-                        // Alternative redirect method
-                        window.location.replace('admin.html');
-                    }
-                }, 1000);
-                
-                // Also add a manual redirect link as backup
-                setTimeout(() => {
-                    if (window.location.pathname.includes('login.html')) {
-                        console.log('Manual redirect fallback...');
-                        const fallbackDiv = document.createElement('div');
-                        fallbackDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 2px solid #00d4ff; border-radius: 10px; z-index: 9999;';
-                        fallbackDiv.innerHTML = `
-                            <p>Redirect didn't work automatically.</p>
-                            <button onclick="window.location.href='admin.html'" style="background: #00d4ff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Go to Dashboard</button>
-                        `;
-                        document.body.appendChild(fallbackDiv);
-                    }
-                }, 3000);
+                    console.log('🚀 Performing redirect...');
+                    window.location.href = 'admin.html';
+                }, 500);
             } else {
                 // Failed login
                 showError(passwordError, 'Invalid email or password. Try demo@electromove.com / demo123');

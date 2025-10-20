@@ -1846,6 +1846,100 @@ body {
     flex: 1;
 }
 
+/* Price Table Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-icon {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.btn-icon:hover {
+    transform: translateY(-2px);
+    border-color: var(--electric-blue);
+    color: var(--electric-blue);
+    background: rgba(0, 212, 255, 0.1);
+}
+
+.btn-icon.btn-edit:hover {
+    border-color: var(--electric-blue);
+    color: var(--electric-blue);
+    background: rgba(0, 212, 255, 0.1);
+}
+
+.btn-icon.btn-toggle:hover {
+    border-color: var(--warning-yellow);
+    color: var(--warning-yellow);
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.btn-icon.btn-delete:hover {
+    border-color: var(--error-red);
+    color: var(--error-red);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.status-active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-green);
+    border: 1px solid var(--success-green);
+}
+
+.status-badge.status-inactive {
+    background: rgba(156, 163, 175, 0.1);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+/* Notification Animation */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
 
 
 /* Responsive */

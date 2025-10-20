@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1f2e;
+            color: white;
+        }
+        button {
+            background: #00d4ff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #00b8e6;
+        }
+        #result {
+            background: #242936;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success {
+            color: #10b981;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .info {
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Price API Test</h1>
+    <p>Testing API: <code>https://swp391.up.railway.app/api/pricetable</code></p>
+    
+    <div>
+        <button onclick="testAPI()">🔄 Test GET All Prices</button>
+        <button onclick="testCORS()">🌐 Test CORS</button>
+        <button onclick="clearResult()">🗑️ Clear</button>
+    </div>
+    
+    <div id="result">Click a button to test the API...</div>
+
+    <script>
+        const API_URL = 'https://swp391.up.railway.app/api/pricetable';
+        const resultDiv = document.getElementById('result');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            resultDiv.innerHTML += `<div class="${color}">[${timestamp}] ${message}</div>`;
+        }
+
+        function clearResult() {
+            resultDiv.innerHTML = 'Results cleared...';
+        }
+
+        async function testAPI() {
+            clearResult();
+            log('🔄 Starting API test...', 'info');
+            log('📡 URL: ' + API_URL, 'info');
+            
+            try {
+                log('🌐 Sending fetch request...', 'info');
+                
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    mode: 'cors'
+                });
+                
+                log('📨 Response received!', 'success');
+                log('   Status: ' + response.status, 'info');
+                log('   Status Text: ' + response.statusText, 'info');
+                log('   OK: ' + response.ok, 'info');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                log('✅ Data parsed successfully!', 'success');
+                log('📊 Number of records: ' + data.length, 'success');
+                log('\n📋 Data:', 'info');
+                log(JSON.stringify(data, null, 2), 'success');
+                
+            } catch (error) {
+                log('❌ ERROR: ' + error.message, 'error');
+                log('   Error name: ' + error.name, 'error');
+                log('   Error stack: ' + error.stack, 'error');
+            }
+        }
+
+        async function testCORS() {
+            clearResult();
+            log('🌐 Testing CORS...', 'info');
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'OPTIONS'
+                });
+                
+                log('✅ CORS preflight successful!', 'success');
+                log('   Headers:', 'info');
+                response.headers.forEach((value, key) => {
+                    log(`   ${key}: ${value}`, 'info');
+                });
+                
+            } catch (error) {
+                log('❌ CORS Error: ' + error.message, 'error');
+            }
+        }
+
+        // Auto-run test on load
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                log('🚀 Auto-running initial test...', 'info');
+                testAPI();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
